@@ -1,0 +1,127 @@
+info:
+  contact: {}
+paths:
+  /index:
+    get:
+      description: 冒烟测试
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      tags:
+      - 首页
+  /user/createUser:
+    post:
+      description: 创建用户
+      parameters:
+      - description: 用户名
+        in: query
+        name: name
+        type: string
+      - description: 密码
+        in: query
+        name: password
+        type: string
+      - description: 确认密码
+        in: query
+        name: repassword
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: code", "message"}
+          schema:
+            type: string
+      summary: 创建用户
+      tags:
+      - 用户服务
+  /user/deleteUser:
+    delete:
+      description: 删除用户
+      parameters:
+      - description: id
+        in: query
+        name: id
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: code", "message"}
+          schema:
+            type: string
+      summary: 删除用户
+      tags:
+      - 用户服务
+  /user/list:
+    get:
+      description: 获取用户列表
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: list
+      summary: 获取用户列表
+      tags:
+      - 用户服务
+  /user/login:
+    post:
+      description: 用户登录服务
+      parameters:
+      - description: 用户名
+        in: formData
+        name: name
+        type: string
+      - description: 登录密码
+        in: formData
+        name: password
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: code", "message"}
+          schema:
+            type: string
+      summary: 用户登录
+      tags:
+      - 用户服务
+  /user/updateUser:
+    patch:
+      description: 修改用户
+      parameters:
+      - description: id
+        in: formData
+        name: id
+        type: string
+      - description: name
+        in: formData
+        name: name
+        type: string
+      - description: password
+        in: formData
+        name: password
+        type: string
+      - description: phone
+        in: formData
+        name: phone
+        type: string
+      - description: email
+        in: formData
+        name: email
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: code", "message"}
+          schema:
+            type: string
+      summary: 修改用户
+      tags:
+      - 用户服务
+swagger: "2.0"

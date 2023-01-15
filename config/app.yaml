@@ -1,2 +1,9 @@
 mysql: 
-  url: "root:root@tcp(172.21.96.1:3306)/ginchat?charset=utf8mb4&parseTime=True&loc=Local"
+  url: "root:root@tcp(172.26.176.1:3306)/ginchat?charset=utf8mb4&parseTime=True&loc=Local"
+redis:
+  addr: "127.0.0.1:6379"
+  password: foobared
+  DB: 0
+  poolSise: 30
+  minIdleConns: 30
+
