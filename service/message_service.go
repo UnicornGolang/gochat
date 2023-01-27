@@ -2,6 +2,7 @@ package service
 
 import (
 	"fmt"
+	"gochat/models"
 	"gochat/utils"
 	"net/http"
 	"time"
@@ -14,6 +15,10 @@ var upgrade = websocket.Upgrader{
 	CheckOrigin: func(r *http.Request) bool {
 		return true
 	},
+}
+
+func SendChatMessage(c *gin.Context) {
+	models.Chat(c.Writer, c.Request)
 }
 
 // 发送消息
@@ -42,7 +47,7 @@ func MsgHandler(ws *websocket.Conn, c *gin.Context) {
 	}
 	tm := time.Now().Format("2006-01-02 15:04:05")
 	m := fmt.Sprintf("[ws]\t[%s]:\t %s", tm, msg)
-  fmt.Println("发送消息:>> ")
+	fmt.Println("发送消息:>> ")
 	err = ws.WriteMessage(1, []byte(m))
 	if err != nil {
 		fmt.Println(err)

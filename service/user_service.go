@@ -13,7 +13,24 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// @Summary 获取用户列表
+// @Description 获取用户列表
+// @Tags 用户服务
+// @Produce json
+// @Success 200 {list} []UserBasic
+// @Router /user/searchFriends [post]
+func SearchFriends(c *gin.Context) {
+	id := c.PostForm("userId")
+	if id == "" {
+		c.JSON(http.StatusOK, models.Failure("为获取到查询参数"))
+		return
+	}
+	userId, _ := strconv.Atoi(id)
+	frinds := models.SearchFriends(uint(userId))
+	utils.RespOKList(c.Writer, frinds, len(frinds))
 
+	//c.JSON(http.StatusOK, models.Success(frinds))
+}
 
 // @Summary 获取用户列表
 // @Description 获取用户列表
@@ -63,7 +80,7 @@ func Login(c *gin.Context) {
 	// 敏感信息去除
 	user.Password = ""
 	user.Salt = ""
-	c.JSON(http.StatusOK, models.Success(user))
+	c.JSON(http.StatusOK, models.Success(&user))
 }
 
 // @Summary  创建用户
@@ -77,11 +94,16 @@ func Login(c *gin.Context) {
 // @Router /user/createUser [post]
 func CreateUser(c *gin.Context) {
 	user := models.UserBasic{}
-	user.Name = c.Query("name")
-	password := c.Query("password")
-	repassword := c.Query("repassword")
+	user.Name = c.PostForm("name")
+	password := c.PostForm("password")
+	identity := c.PostForm("identity")
 
-	if password != repassword {
+	if user.Name == "" || password == "" {
+		c.JSON(http.StatusOK, models.Failure("用户名和密码不能为空"))
+		return
+	}
+
+	if password != identity {
 		c.JSON(http.StatusOK, models.Failure("两次输入的明码不同"))
 		return
 	}
@@ -95,7 +117,7 @@ func CreateUser(c *gin.Context) {
 	user.Password = utils.MakePassword(password, salt)
 	user.Salt = salt
 	models.CreateUser(user)
-	c.JSON(http.StatusOK, models.Success())
+	c.JSON(http.StatusOK, models.Success(nil))
 }
 
 // @Summary  修改用户
@@ -131,7 +153,7 @@ func UpdateUser(c *gin.Context) {
 	}
 
 	models.UpdateUser(user)
-	c.JSON(http.StatusOK, models.Success())
+	c.JSON(http.StatusOK, models.Success(nil))
 }
 
 // @Summary  删除用户
@@ -149,5 +171,5 @@ func DeleteUser(c *gin.Context) {
 	// c.JSON(200, gin.H{
 	// 	"message": "删除成功",
 	// })
-	c.JSON(http.StatusOK, models.Success())
+	c.JSON(http.StatusOK, models.Success(nil))
 }

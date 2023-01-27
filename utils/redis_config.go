@@ -25,15 +25,15 @@ func InitRedis() {
 	})
 	pong, err := RDP.Ping(RDP.Context()).Result()
 	if err != nil {
-		fmt.Println("cofing redis init err...")
-	} else {
-		fmt.Println("##################################################")
-		fmt.Println("### ---------      mysql config    ------------###")
-		fmt.Println("##################################################")
-		fmt.Println("config redis: ", viper.Get("redis"))
-		fmt.Println("redis init successful! redis heartbeat " + pong)
-		fmt.Println("")
+		fmt.Println("cofing redis init err...", err.Error())
+		return
 	}
+	fmt.Println("##################################################")
+	fmt.Println("### ---------    redis config    ------------###")
+	fmt.Println("##################################################")
+	fmt.Println("config redis: ", viper.Get("redis"))
+	fmt.Println("redis init successful! redis heartbeat " + pong)
+	fmt.Println("")
 }
 
 // Publish 消息到 redis

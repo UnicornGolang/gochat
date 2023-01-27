@@ -13,14 +13,13 @@ const (
 	FAILURE int = -1
 )
 
-func Success(data ...interface{}) *Result {
+func Success(data interface{}) *Result {
 	return &Result{
 		Code:    SUCCESS,
 		Message: "操作成功",
-		Data:    data[0],
+		Data:    data,
 	}
 }
-
 
 func Failure(message string) *Result {
 	return &Result{

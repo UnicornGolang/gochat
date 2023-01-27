@@ -26,7 +26,8 @@ func InitMySQL() {
 			Colorful:      true,        // 日志彩色显示
 		},
 	)
-	DB, _ = gorm.Open(mysql.Open(viper.GetString("mysql.url")), &gorm.Config{
+	var err error
+	DB, err = gorm.Open(mysql.Open(viper.GetString("mysql.url")), &gorm.Config{
 
 		// 开启默认的日志
 		// Logger: logger.Default.LogMode(logger.Info),
@@ -39,8 +40,12 @@ func InitMySQL() {
 			SingularTable: true,
 		},
 	})
+	if err != nil {
+		fmt.Println("mysql connect error: ", err.Error())
+		return
+	}
 	fmt.Println("##################################################")
-	fmt.Println("### ---------      redis config    ------------###")
+	fmt.Println("### ---------     mysql config    ------------###")
 	fmt.Println("##################################################")
 	fmt.Println("config mysql: ", viper.Get("mysql"))
 	fmt.Println("mysql init successful!!")
