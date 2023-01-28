@@ -13,6 +13,34 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// @Summary 添加好友
+// @Description 添加好友
+// @Tags 用户服务
+// @Produce json
+// @Success 200 {json} Result
+// @Router /user/addFriend [post]
+func AddFriend(c *gin.Context) {
+	userId := c.PostForm("userId")
+	friendName := c.PostForm("targetName")
+	if userId == "" || friendName == "" {
+		c.JSON(http.StatusOK, models.Failure("未获取到请求参数"))
+		return
+	}
+	OwnId, _ := strconv.Atoi(userId)
+  // 查找对应的名称的好友
+  friend := models.GetUserByName(friendName)
+  if friend.ID == 0 {
+		c.JSON(http.StatusOK, models.Failure("未找到指定的好友"))
+    return
+  }
+  if uint(OwnId) == friend.ID {
+		c.JSON(http.StatusOK, models.Failure("不能添加自己为好友"))
+    return
+  }
+	models.AddFriendRelation(uint(OwnId), friend.ID)
+	c.JSON(http.StatusOK, models.Success(nil))
+}
+
 // @Summary 获取用户列表
 // @Description 获取用户列表
 // @Tags 用户服务

@@ -3,26 +3,26 @@
 
   function upload(dom) {
     uploadfile("attach/upload", dom, function (res) {
-      if (res.Code == 0) {
-        app.sendpicmsg(res.Data)
+      if (res.code == 0) {
+        app.sendpicmsg(res.data)
       }
     })
   }
   //上传图片 创建群
   function uploadthis(dom) {
     uploadfile("attach/upload", dom, function (res) {
-      if (res.Code == 0) {
-        app.com.icon = res.Data;
-        console.log(res.Data);
+      if (res.code == 0) {
+        app.com.icon = res.data;
+        console.log(res.data);
       }
     })
   }
   //维护用户头像
   function uploadUserInfo(dom) {
     uploadfile("attach/upload", dom, function (res) {
-      if (res.Code == 0) {
-        app.info.icon = res.Data;
-        console.log(res.Data);
+      if (res.code == 0) {
+        app.info.icon = res.data;
+        console.log(res.data);
       }
     })
   }
@@ -197,7 +197,7 @@
                 console.log("ondataavailable");
                 uploadaudio("attach/upload", event.data, res => {
                   var duration = Math.ceil((new Date().getTime() - this.duration) / 1000);
-                  this.sendaudiomsg(res.Data, duration);
+                  this.sendaudiomsg(res.data, duration);
                 })
                 stream.getTracks().forEach(function (track) {
                   track.stop();
@@ -421,8 +421,8 @@
           var userinfo = this.usermap[userid];
           if (!userinfo) {
             post("user/find", {userId: parseInt(userid)}, function (res) {
-              cb(res.Data);
-              this.usermap[userid] = res.Data;
+              cb(res.data);
+              this.usermap[userid] = res.data;
             }.bind(this))
           } else {
             cb(userinfo)
@@ -479,11 +479,11 @@
         loadfriends: function () {
           var that = this;
           post("user/searchFriends", {userId: userId()}, function (res) {
-            that.friends = res.Rows || [];
+            that.friends = res.rows || [];
             var usermap = this.usermap;
-            for (var i in res.Rows) {
-              var k = "" + res.Rows[i].ID
-              usermap[k] = res.Rows[i];
+            for (var i in res.rows) {
+              var k = "" + res.rows[i].ID
+              usermap[k] = res.rows[i];
             }
             this.usermap = usermap;
           }.bind(this))
@@ -491,7 +491,7 @@
         loadcommunitys: function () {
           var that = this;
           post("contact/loadcommunity", {ownerId: userId()}, function (res) {
-            that.communitys = res.Rows || [];
+            that.communitys = res.rows || [];
           })
         },
         addfriend: function () {
@@ -519,12 +519,12 @@
             this.setTimeFlag()
             //console.log("_addfriend....")
             var that = this
-            post("contact/addfriend", {targetName: dstobj, userId: userId()}, function (res) {
-              if (res.Code == 0) {
+            post("contact/addFriend", {targetName: dstobj, userId: userId()}, function (res) {
+              if (res.code == 0) {
                 mui.toast("添加成功");
                 that.loadfriends();
               } else {
-                mui.toast(res.Msg);
+                mui.toast(res.msg);
               }
             })
           }
@@ -547,7 +547,7 @@
           console.log(this.com)
           util.post("/contact/createCommunity", this.com).then(res => {
             console.log(res)
-            if (res.Code != 0) {
+            if (res.code != 0) {
               mui.toast(res.Msg)
             } else {
               //location.replace("localhost:8081")
@@ -567,7 +567,7 @@
             userInfo.Avatar = this.info.icon;
             userInfo.Name = this.info.name;
             sessionStorage.setItem('userinfo', JSON.stringify(userInfo))
-            if (res.Code != 0) {
+            if (res.code != 0) {
               mui.toast(res.message)
             } else {
               //location.replace("localhost:8081")
@@ -589,7 +589,7 @@
             var that = this;
             console.log(that);
             post("contact/joinGroup", {comId: dstobj, "userId": userId()}, function (res) {
-              if (res.Code == 0) {
+              if (res.code == 0) {
                 mui.toast("添加成功");
 
                 that.loadcommunitys();

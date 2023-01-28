@@ -34,6 +34,9 @@ func Router() *gin.Engine {
 	r.PATCH("/user/updateUser", service.UpdateUser)
 	r.POST("/user/searchFriends", service.SearchFriends)
 
+	// 添加好友
+	r.POST("/contact/addFriend", service.AddFriend)
+
 	// 消息处理
 	r.GET("/message/send", service.SendMessage)
 	r.GET("/message/chat", service.SendChatMessage)
