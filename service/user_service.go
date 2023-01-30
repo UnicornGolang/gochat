@@ -13,12 +13,42 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// @Summary 加入某个群聊
+// @Description 加入群聊
+// @Tags 用户服务
+// @Produce json
+// @Success 200 {json} Result
+// @Router /contact/joinGroup [post]
+func JoinGroup(c *gin.Context) {
+	userId, _ := strconv.Atoi(c.PostForm("userId"))
+	dbuser := models.GetUserById(uint(userId))
+	if dbuser.ID == 0 {
+		c.JSON(http.StatusOK, models.Failure("用户未登录"))
+		return
+	}
+	comId := c.PostForm("comId")
+	if len(comId) < 1 {
+		c.JSON(http.StatusOK, models.Failure("未获取到需要加入的群组的信息"))
+		return
+	}
+	community := models.GetCommunityByNameOrId(comId)
+	if community.Name == "" {
+		c.JSON(http.StatusOK, models.Failure("未找到对应的群组信息"))
+		return
+	}
+	contact := models.Contact{}
+	contact.OwnerId = uint(userId)
+	contact.TargetId = community.ID
+	models.JoinCommunity(&contact)
+	c.JSON(http.StatusOK, models.Success(nil))
+}
+
 // @Summary 加载用户群组
 // @Description 加载群组群聊
 // @Tags 用户服务
 // @Produce json
 // @Success 200 {json} []Community
-// @Router /user/loadCommunity [post]
+// @Router /contact/loadCommunity [post]
 func LoadCommunity(c *gin.Context) {
 	ownerId, _ := strconv.Atoi(c.PostForm("ownerId"))
 	if ownerId == 0 {
@@ -30,18 +60,18 @@ func LoadCommunity(c *gin.Context) {
 		c.JSON(http.StatusOK, models.Failure("用户不存在"))
 		return
 	}
-  communities := models.LoadCommunity(dbuser.ID)
-  utils.RespOKList(c.Writer, communities, len(communities))
+	communities := models.LoadCommunity(dbuser.ID)
+	utils.RespOKList(c.Writer, communities, len(communities))
 }
-
 
 // @Summary 创建群聊
 // @Description 创建群聊
 // @Tags 用户服务
 // @Produce json
 // @Success 200 {json} Result
-// @Router /user/addCommunity [post]
+// @Router /contact/addCommunity [post]
 func AddCommunity(c *gin.Context) {
+
 	ownerId, _ := strconv.Atoi(c.PostForm("ownerId"))
 	name := c.PostForm("name")
 	icon := c.PostForm("icon")
@@ -59,14 +89,32 @@ func AddCommunity(c *gin.Context) {
 		c.JSON(http.StatusOK, models.Failure("用户不存在"))
 		return
 	}
+  tx := utils.DB.Begin()
+  defer func() {
+    if r := recover(); r != nil {
+      fmt.Println("add community err : ", r)
+      tx.Rollback()
+    }
+  }()
 	community := &models.Community{
 		OwnerId: uint(ownerId),
 		Name:    name,
 		Img:     icon,
 		Desc:    desc,
 	}
-	models.AddCommunity(community)
+  models.AddCommunity(community)
+
+  // 添加团队成员
+  concact := models.Contact{}
+  concact.TargetId = community.ID
+  concact.OwnerId = uint(ownerId)
+  concact.Type = 2
+  if err := utils.DB.Create(&concact).Error; err != nil {
+    fmt.Println("create Community err ", err)
+    tx.Rollback()
+  }
 	c.JSON(http.StatusOK, models.Success(nil))
+  tx.Commit()
 }
 
 // @Summary 添加好友

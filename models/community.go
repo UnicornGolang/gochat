@@ -20,12 +20,24 @@ func (table *Community) TableName() string {
 	return "community"
 }
 
+func GetCommunityByNameOrId(comId string) *Community {
+  community := Community{}
+  utils.DB.Where("id = ? or name = ?", comId, comId).Find(&community)
+  return &community
+}
+
 func AddCommunity(community *Community) {
 	utils.DB.Create(community)
 }
 
 func LoadCommunity(userId uint) []*Community {
-  data := make([]*Community, 10)
-  utils.DB.Where("owner_id = ?", userId).Find(&data)
-  return data
+	data := make([]*Contact, 0)
+  comminityIds := make([]uint,0)
+	utils.DB.Where("owner_id = ? and type = 2", userId).Find(&data)
+  for _, v := range data {
+    comminityIds = append(comminityIds, v.TargetId)
+  }
+  comminities := make([]*Community, 10)
+  utils.DB.Where("id in ?", comminityIds).Find(&comminities)
+	return comminities
 }

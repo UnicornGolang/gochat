@@ -62,7 +62,7 @@
         util.post("/user/createUser", this.user).then(res => {
           console.log(res)
           if (res.code != 0) {
-            mui.toast(res.message)
+            mui.toast(res.msg)
           } else {
             //location.replace("localhost:8081")
             location.href = "/"

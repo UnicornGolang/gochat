@@ -70,3 +70,19 @@ func AddFriendRelation(userId uint, friendId uint) {
 	}
 	tx.Commit()
 }
+
+func JoinCommunity(contact *Contact) {
+	_contact := Contact{}
+
+	utils.DB.Where(
+    "owner_id = ? and target_id = ? and type = 2",
+    contact.OwnerId,
+    contact.TargetId,
+  ).Find(&_contact)
+
+  // 没有加入群聊则加入, 否则不做任何操作
+	if _contact.ID == 0 {
+    contact.Type = 2
+    utils.DB.Create(&contact)
+	}
+}
