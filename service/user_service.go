@@ -13,6 +13,62 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// @Summary 加载用户群组
+// @Description 加载群组群聊
+// @Tags 用户服务
+// @Produce json
+// @Success 200 {json} []Community
+// @Router /user/loadCommunity [post]
+func LoadCommunity(c *gin.Context) {
+	ownerId, _ := strconv.Atoi(c.PostForm("ownerId"))
+	if ownerId == 0 {
+		c.JSON(http.StatusOK, models.Failure("用户需先登录"))
+		return
+	}
+	dbuser := models.GetUserById(uint(ownerId))
+	if dbuser.ID == 0 {
+		c.JSON(http.StatusOK, models.Failure("用户不存在"))
+		return
+	}
+  communities := models.LoadCommunity(dbuser.ID)
+  utils.RespOKList(c.Writer, communities, len(communities))
+}
+
+
+// @Summary 创建群聊
+// @Description 创建群聊
+// @Tags 用户服务
+// @Produce json
+// @Success 200 {json} Result
+// @Router /user/addCommunity [post]
+func AddCommunity(c *gin.Context) {
+	ownerId, _ := strconv.Atoi(c.PostForm("ownerId"))
+	name := c.PostForm("name")
+	icon := c.PostForm("icon")
+	desc := c.PostForm("desc")
+	if ownerId == 0 {
+		c.JSON(http.StatusOK, models.Failure("用户需先登录"))
+		return
+	}
+	if len(name) < 1 {
+		c.JSON(http.StatusOK, models.Failure("群组名称不能为空"))
+		return
+	}
+	dbuser := models.GetUserById(uint(ownerId))
+	if dbuser.ID == 0 {
+		c.JSON(http.StatusOK, models.Failure("用户不存在"))
+		return
+	}
+	community := &models.Community{
+		OwnerId: uint(ownerId),
+		Name:    name,
+		Img:     icon,
+		Desc:    desc,
+	}
+	models.AddCommunity(community)
+	c.JSON(http.StatusOK, models.Success(nil))
+}
+
 // @Summary 添加好友
 // @Description 添加好友
 // @Tags 用户服务
@@ -27,16 +83,16 @@ func AddFriend(c *gin.Context) {
 		return
 	}
 	OwnId, _ := strconv.Atoi(userId)
-  // 查找对应的名称的好友
-  friend := models.GetUserByName(friendName)
-  if friend.ID == 0 {
+	// 查找对应的名称的好友
+	friend := models.GetUserByName(friendName)
+	if friend.ID == 0 {
 		c.JSON(http.StatusOK, models.Failure("未找到指定的好友"))
-    return
-  }
-  if uint(OwnId) == friend.ID {
+		return
+	}
+	if uint(OwnId) == friend.ID {
 		c.JSON(http.StatusOK, models.Failure("不能添加自己为好友"))
-    return
-  }
+		return
+	}
 	models.AddFriendRelation(uint(OwnId), friend.ID)
 	c.JSON(http.StatusOK, models.Success(nil))
 }
