@@ -7,3 +7,13 @@ redis:
   poolSise: 30
   minIdleConns: 30
 
+timeout:
+  taskDelay: 3      # 系统启动后多久开始定时任务
+  taskIdle: 30      # 每隔多久重复执行一次定时任务
+  heatbeatMaxTime: 30000  # 最大心跳时间，超过此时间未收到心跳就下线
+  redisOnlineTime: 4 # 缓存的在线用户时长
+
+server:
+  port: ":8080"
+  udp: 3001
+

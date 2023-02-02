@@ -5,6 +5,7 @@ import (
 	"gochat/models"
 	"gochat/utils"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -17,6 +18,20 @@ var upgrade = websocket.Upgrader{
 	},
 }
 
+
+
+// 从 redis 读取历史消息
+func RedisMsg(c *gin.Context) {
+  userIdA, _ := strconv.Atoi(c.PostForm("userIdA"))
+  userIdB, _ := strconv.Atoi(c.PostForm("userIdB"))
+  start, _ := strconv.Atoi(c.PostForm("start"))
+  end, _ := strconv.Atoi(c.PostForm("end"))
+  isRev, _ := strconv.ParseBool(c.PostForm("isRev"))
+  res := models.RedisMsg(uint(userIdA), uint(userIdB), int64(start), int64(end), isRev)
+  utils.RespOKList(c.Writer, res, len(res))
+}
+
+// 获取 ws 通信 连接
 func SendChatMessage(c *gin.Context) {
 	models.Chat(c.Writer, c.Request)
 }

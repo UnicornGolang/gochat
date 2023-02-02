@@ -38,9 +38,7 @@ func (table *UserBasic) TableName() string {
 func GetUserList() []*UserBasic {
 	data := make([]*UserBasic, 10)
 	utils.DB.Find(&data)
-
 	return data
-
 }
 
 // 根据 id 获取用户

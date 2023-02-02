@@ -89,32 +89,32 @@ func AddCommunity(c *gin.Context) {
 		c.JSON(http.StatusOK, models.Failure("用户不存在"))
 		return
 	}
-  tx := utils.DB.Begin()
-  defer func() {
-    if r := recover(); r != nil {
-      fmt.Println("add community err : ", r)
-      tx.Rollback()
-    }
-  }()
+	tx := utils.DB.Begin()
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Println("add community err : ", r)
+			tx.Rollback()
+		}
+	}()
 	community := &models.Community{
 		OwnerId: uint(ownerId),
 		Name:    name,
 		Img:     icon,
 		Desc:    desc,
 	}
-  models.AddCommunity(community)
+	models.AddCommunity(community)
 
-  // 添加团队成员
-  concact := models.Contact{}
-  concact.TargetId = community.ID
-  concact.OwnerId = uint(ownerId)
-  concact.Type = 2
-  if err := utils.DB.Create(&concact).Error; err != nil {
-    fmt.Println("create Community err ", err)
-    tx.Rollback()
-  }
+	// 添加团队成员
+	concact := models.Contact{}
+	concact.TargetId = community.ID
+	concact.OwnerId = uint(ownerId)
+	concact.Type = 2
+	if err := utils.DB.Create(&concact).Error; err != nil {
+		fmt.Println("create Community err ", err)
+		tx.Rollback()
+	}
 	c.JSON(http.StatusOK, models.Success(nil))
-  tx.Commit()
+	tx.Commit()
 }
 
 // @Summary 添加好友
@@ -304,4 +304,22 @@ func DeleteUser(c *gin.Context) {
 	// 	"message": "删除成功",
 	// })
 	c.JSON(http.StatusOK, models.Success(nil))
+}
+
+// @Summary 查找用户
+// @Description 根据Id查找用户
+// @Tags 用户服务
+// @Produce json
+// @param id formData string false "id"
+// @Success 200 {string} Result
+// @Router /user/findById [post]
+func GetUserById(c *gin.Context) {
+	id := c.PostForm("userId")
+	if len(id) < 1 {
+		c.JSON(http.StatusOK, models.Failure("未获取到查询参数"))
+		return
+	}
+	userId, _ := strconv.Atoi(id)
+	user := models.GetUserById(uint(userId))
+	c.JSON(http.StatusOK, models.Success(user))
 }

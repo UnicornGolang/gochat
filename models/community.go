@@ -21,9 +21,9 @@ func (table *Community) TableName() string {
 }
 
 func GetCommunityByNameOrId(comId string) *Community {
-  community := Community{}
-  utils.DB.Where("id = ? or name = ?", comId, comId).Find(&community)
-  return &community
+	community := Community{}
+	utils.DB.Where("id = ? or name = ?", comId, comId).Find(&community)
+	return &community
 }
 
 func AddCommunity(community *Community) {
@@ -32,12 +32,12 @@ func AddCommunity(community *Community) {
 
 func LoadCommunity(userId uint) []*Community {
 	data := make([]*Contact, 0)
-  comminityIds := make([]uint,0)
+	comminityIds := make([]uint, 0)
 	utils.DB.Where("owner_id = ? and type = 2", userId).Find(&data)
-  for _, v := range data {
-    comminityIds = append(comminityIds, v.TargetId)
-  }
-  comminities := make([]*Community, 10)
-  utils.DB.Where("id in ?", comminityIds).Find(&comminities)
+	for _, v := range data {
+		comminityIds = append(comminityIds, v.TargetId)
+	}
+	comminities := make([]*Community, 10)
+	utils.DB.Where("id in ?", comminityIds).Find(&comminities)
 	return comminities
 }
