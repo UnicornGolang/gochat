@@ -22,7 +22,7 @@ type Message struct {
 	gorm.Model
 	UserId     uint   // 消息的发送者
 	TargetId   uint   // 消息的接收者
-	Type       int    // 消息的类型, 私发，群发，广播
+	Type       int    // 消息的类型, 1.私发，2.群发，3.广播
 	Media      int    // 消息内容的类型，文字，图片，音频
 	Content    string // 消息的内容
 	CreateTime uint64 // 创建时间
@@ -59,7 +59,6 @@ func Chat(writer http.ResponseWriter, request *http.Request) {
 	query := request.URL.Query()
 	id := query.Get("userId")
 	userId, _ := strconv.Atoi(id)
-	fmt.Println("USERID", userId)
 	//msgType := query.Get("type")
 	//targetId := query.Get("targetId")
 	//context := query.Get("context")
@@ -99,6 +98,9 @@ func Chat(writer http.ResponseWriter, request *http.Request) {
 
 	// 用户上线后在 redis 中存储在线信息
 	SetUserOnlineInfo("online_"+id, []byte(node.Addr), time.Duration(viper.GetInt("timeout.redisOnlineTime"))*time.Hour)
+	fmt.Println("---------------- user login --------------------------")
+	fmt.Printf("%d online : %s\n", userId, time.Now().Format("2006-01-02 15:04:05"))
+	fmt.Println("------------------------------------------------------")
 }
 
 // 设置用户在线状态
@@ -154,7 +156,7 @@ func broadMsg(data []byte) {
 func udpSendProc() {
 	con, err := net.DialUDP("udp", nil, &net.UDPAddr{
 		IP:   net.IPv4(127, 0, 0, 1),
-		Port:  3001, // viper.GetInt("server.udp"),
+		Port: 3001,
 	})
 	if err != nil {
 		fmt.Println(err)
@@ -162,7 +164,6 @@ func udpSendProc() {
 	}
 	defer con.Close()
 	for data := range udpsendChan {
-    fmt.Println("udp receive data: ", string(data))
 		_, err := con.Write(data)
 		if err != nil {
 			fmt.Println("[DataSend Err]===", err)
@@ -174,7 +175,7 @@ func udpSendProc() {
 func udpRecvProc() {
 	con, err := net.ListenUDP("udp", &net.UDPAddr{
 		IP:   net.IPv4zero,
-		Port: 3001, // viper.GetInt("server.udp"),
+		Port: 3001,
 	})
 	if err != nil {
 		fmt.Println(err)
@@ -188,14 +189,12 @@ func udpRecvProc() {
 			fmt.Println("[Read Err]===", err)
 			return
 		}
-    fmt.Println("readdata: " + string(buf[0:n]))
 		dispatch(buf[0:n])
 	}
 }
 
 func dispatch(data []byte) {
 	msg := Message{}
-	fmt.Println(string(data))
 	err := json.Unmarshal(data, &msg)
 	if err != nil {
 		fmt.Println(err)
@@ -253,8 +252,12 @@ func sendMsg(targetId uint, data []byte, msg *Message) {
 	} else {
 		fmt.Println("用户不在线")
 	}
-	key := getMsgStoreKey(msg.UserId, targetId)
+  // 非私聊的消息不缓存
+	if msg.Type > 1 {
+		return
+	}
 	// 将消息持久化到 redis 中，方便后期上线后查看
+	key := getMsgStoreKey(msg.UserId, targetId)
 	res, err := utils.RDP.ZRevRange(ctx, key, 0, -1).Result() // MsgList
 	if err != nil {
 		fmt.Println("[Redis read err] === ", err)
@@ -312,6 +315,7 @@ func RedisMsg(userIdA, userIdB uint, start, end int64, isRev bool) []string {
 func CleanConnection(param interface{}) (result bool) {
 	info := fmt.Sprintf("当前清理时间: %s, 参数 : %v", time.Now().Format("2006-01-02 15:04:05"), param)
 	fmt.Println("[定时任务清理超时连接] === ", info)
+  ctx := context.Background()
 	result = true
 	defer func() {
 		if r := recover(); r != nil {
@@ -326,6 +330,8 @@ func CleanConnection(param interface{}) (result bool) {
 			fmt.Println("超过最大时限未收到客户端心跳，自动下线, userId: ", i)
 			fmt.Println("--------------------------------------------------")
 			node.Conn.Close()
+      delete(clientMap, i)
+      utils.RDP.Del(ctx, fmt.Sprintf("online_%d", i))
 		}
 	}
 	return
