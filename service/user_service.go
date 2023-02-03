@@ -273,9 +273,10 @@ func UpdateUser(c *gin.Context) {
 	}
 	user.ID = uint(id)
 	user.Name = c.PostForm("name")
-	user.Password = utils.MakePassword(c.PostForm("password"), oldUser.Salt)
-	user.Phone = c.PostForm("phone")
-	user.Email = c.PostForm("email")
+	//user.Password = utils.MakePassword(c.PostForm("password"), oldUser.Salt)
+	//user.Phone = c.PostForm("phone")
+	//user.Email = c.PostForm("email")
+	user.Avatar = c.PostForm("icon")
 	// 数据格式校验，电话，邮箱
 	_, err := govalidator.ValidateStruct(user)
 	if err != nil {

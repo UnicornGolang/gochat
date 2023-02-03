@@ -32,7 +32,7 @@ func Router() *gin.Engine {
 	r.POST("/user/login", service.Login)
 	r.POST("/user/createUser", service.CreateUser)
 	r.DELETE("/user/deleteUser", service.DeleteUser)
-	r.PATCH("/user/updateUser", service.UpdateUser)
+	r.POST("/user/updateUser", service.UpdateUser)
 	r.POST("/user/searchFriends", service.SearchFriends)
   r.POST("/user/findById", service.GetUserById)
 
