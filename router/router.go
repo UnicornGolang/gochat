@@ -34,7 +34,7 @@ func Router() *gin.Engine {
 	r.DELETE("/user/deleteUser", service.DeleteUser)
 	r.POST("/user/updateUser", service.UpdateUser)
 	r.POST("/user/searchFriends", service.SearchFriends)
-  r.POST("/user/findById", service.GetUserById)
+	r.POST("/user/findById", service.GetUserById)
 
 	// 添加好友
 	r.POST("/contact/addFriend", service.AddFriend)
